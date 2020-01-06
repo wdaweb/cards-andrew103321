@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #game {
+            margin: auto;
+            width: 500px;
+        }
+
+        .card {
+            width: 100px;
+            height: 180px;
+            /* 設定子元素在3D空間 */
+            transform-style: preserve-3d;
+            position: relative;
+            transition: transform 0.5s;
+            transition: left 5s;
+            float: left;
+            margin: 10px;
+        }
+
+        .open {
+            /* transform: rotateX(90deg); */
+            transform: rotateY(180deg);
+        }
+
+        .front {
+            width: 100px;
+            height: 180px;
+            background-image: url(./card/Gray_back.jpg);
+            background-position: center;
+            background-size: contain;
+            background-repeat: no-repeat;
+            position: absolute;
+
+        }
+
+        .back {
+            width: 100px;
+            height: 180px;
+            background-position: center;
+            background-size: contain;
+            background-repeat: no-repeat;
+            position: absolute;
+            /* transform: rotateX(90deg); */
+            transform: rotateY(180deg);
+
+        }
+
+        .run {
+            width: 100px;
+            height: 180px;
+            background-position: center;
+            background-size: contain;
+            background-repeat: no-repeat;
+            transform-origin: bottom center;
+            position: absolute;
+            top: 542px;
+            left: 22%;
+          
+            
+
+        }
+
+        #animation {
+            width: 100%;
+            height: 100%;
+
+            position: relative;
+            top: 210px;
+            left: 46%;
+        }
+        #particles{
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top:0;
+            background: saddlebrown;
+            z-index: -1;
+        }
+        #content{
+            width: 125px;
+            height: 100px;
+            position: relative;
+            left: 266px;
+            top: 420px;
+            background: #CCD;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="particles"></div>
+    <div id="content">
+    <input type="button" value="開始遊戲" id="startBtn">
+    <input type="button" value="透視" id="see">
+    遊戲時間<span id="time">0</span>
+    </div>
+    <!-- <div id="game"></div> -->
+    <div id="game">
+        <div id="run">
+            <!-- <div class="run" style="transform:rotate(-90deg);
+                background-image: url(./card/Gray_back.jpg)"></div> -->
+        </div>
+    </div>
+
+    <script src='./jquery-3.4.1.min.js'></script>
+    <script src="particles.min.js"></script>
+    <script>
+       particlesJS.load('particles', 'particlesjs-config.json', function() {
+        console.log('callback - particles.js config loaded');
+        })
+        $(function () {
+            $("#see").attr("disabled", true);
+
+            $("#startBtn").on("click", function () {
+                $(this).attr("disabled", true);
+                $("#see").attr("disabled", false);
+
+                for (let i = 0; i < 16; i++) {
+                    $("#run").append(`<div class='run' data-id=${i} style='transform:rotate(${i*10-90}deg);
+                  background-image: url(./card/Gray_back.jpg)'></div>`);
+
+                    
+                    $("#game").append(`
+                                <div class="card" style="display:none">
+                                    <div class="front"><div>
+                                    <div class="back"><div>
+                                <div>
+                                `)
+
+                    if ($(".card").length == 16) {
+                        for (let a = 0; a < 16; a++) {
+
+                            $("#run").find(".run").eq(a).fadeOut(2000 +a*100, function () {
+                                $("#game").find(".card").eq(a).show().fadeIn()
+                            })
+                        }
+
+                    }
+
+                }
+                $("#see").on("click", function () {
+                    $(".card").addClass("open")
+                    setTimeout(() => {
+                        $(".open").removeClass("open");
+                        $(this).attr("disabled", true);
+                    }, 1000);
+                })
+
+                var time_s = 0
+                let timer = setInterval(() => {
+                    $("#time").text(time_s)
+                    time_s++;
+                    $("#time").text(time_s)
+                }, 1000);
+
+
+
+                for (let i = 0; i < $(".card").length; i++) {
+
+                    let add = i % ($(".card").length / 2) + 1;
+                    $(".card").eq(i).find(".back").css("background-image", `url(./card/${add}S.jpg)`);
+                    $(".card").eq(i).attr("data-card", add);
+
+                    let target = Math.floor(Math.random() * $(".card").length);
+                    $(".card").eq(target).insertAfter($(".card").eq(i));
+                }
+
+
+
+
+                $(".card").on("click", function () {
+
+                    if ($(".open").length < 2 && !$(this).hasClass("open")) {
+                        $(this).addClass("open")
+                    }
+
+                    if ($(".open").length == 2) {
+
+                        setTimeout(() => {
+                            $(".open").removeClass("open");
+                        }, 1000);
+                    }
+                    if ($(".open").eq(0).attr("data-card") == $(".open").eq(1).attr("data-card")) {
+                        $(".open").fadeTo(1000, 0).addClass("clear")
+                    }
+
+                    if ($(".clear").length == $(".card").length) {
+                        clearInterval(timer);
+                        setTimeout(() => {
+                            alert("恭喜過關")
+                            window.location = "翻牌.html";
+                        }, 500);
+                    }
+
+
+                })
+            })
+        })
+    </script>
+</body>
+
+</html>
